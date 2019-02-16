@@ -1,11 +1,11 @@
 title: 5# Longest Palindromic Substring
 date: 2015-01-05 21:30:00
 categories: 算法
-tags: [String,回文,算法] 
-description: 弱鸡进城纪实
----
+tags: [String,回文,算法]
 
->弱鸡进城纪实。
+## description: 弱鸡进城纪实
+
+> 弱鸡进城纪实。
 
 <!--more-->
 
@@ -23,27 +23,25 @@ description: 弱鸡进城纪实
 
 下面就具体来说下这个算法是怎么做到的（大部分[来自这里][2]）：
 
-首先对字符串进行预处理，用特殊字符将其填充至偶数个字符数，例如“123”填充至“$#1#2#3#*”，首尾选择特殊字符以标示开始结束（或者别的方法也行）。
+首先对字符串进行预处理，用特殊字符将其填充至偶数个字符数，例如“123”填充至“$#1#2#3#\*”，首尾选择特殊字符以标示开始结束（或者别的方法也行）。
 
 然后用一个数组P[i]来记录以字符S[i]为中心的最长回文子串向左/右扩张的长度（包括S[i]，也就是把该回文串“对折”以后的长度）。如：
 
-```
-S  #1#2#2#1#2#3#2#1#
-P  12125214121612121
-```
+    S  #1#2#2#1#2#3#2#1#
+    P  12125214121612121
+
 显见的，P[i]-1的最大值就是我们要求的最长回文子串的长度。
 
 那么，**如何计算P[i]？**
 
 首先我们需要先说明一个关键的不等式：
 
-```
-P[i] >= MIN(P[2*id-i], mx-i)
-```
-*	id是当前最长回文子串的中心
-*	mx是当前最长回文子串的扩张大小
-*	i是当前考察的字符位置
-*	j=2*id-i是i相对于id对称的点
+    P[i] >= MIN(P[2*id-i], mx-i)
+
+-   id是当前最长回文子串的中心
+-   mx是当前最长回文子串的扩张大小
+-   i是当前考察的字符位置
+-   j=2\*id-i是i相对于id对称的点
 
 那么这个不等式的含义就是，**P[i]或者等于P[j]，或者大于或等于mx-i**。
 
@@ -61,32 +59,32 @@ P[i] >= MIN(P[2*id-i], mx-i)
 
 OK，到这里，最重要的三点已经解释清楚了，那么接下来我们就可以写出如下的计算P[i]的代码了：
 
-```
-//输入，并处理得到字符串s
-int p[1000], mx = 0, id = 0;
-//初始化P数组
-memset(p, 0, sizeof(p));
-//遍历S字符数组
-for (i = 1; s[i] != '\0'; i++) {
-	//核心点，p[i]的值通过历史值进行初始化。
-    p[i] = mx > i ? min(p[2*id-i], mx-i) : 1;
-    //对p[i]进行更新
-    while (s[i + p[i]] == s[i - p[i]]) p[i]++;
-    //如果p[i]+i的范围比mx更大，那么后续的点就需要在这个新的范围内进行考察了。
-    if (i + p[i] > mx) {
-        mx = i + p[i];
-        id = i;
+    //输入，并处理得到字符串s
+    int p[1000], mx = 0, id = 0;
+    //初始化P数组
+    memset(p, 0, sizeof(p));
+    //遍历S字符数组
+    for (i = 1; s[i] != '\0'; i++) {
+    	//核心点，p[i]的值通过历史值进行初始化。
+        p[i] = mx > i ? min(p[2*id-i], mx-i) : 1;
+        //对p[i]进行更新
+        while (s[i + p[i]] == s[i - p[i]]) p[i]++;
+        //如果p[i]+i的范围比mx更大，那么后续的点就需要在这个新的范围内进行考察了。
+        if (i + p[i] > mx) {
+            mx = i + p[i];
+            id = i;
+        }
     }
-}
-//找出p[i]中最大的
-```
+    //找出p[i]中最大的
+
 OK，到此为止这个算法就记录的差不多了，其实主要的思想还是复用之前算出来的结果，达到简化运算的目的，这个算法在while循环上省了很多功夫。
 
 整个复杂度不太好算，既然他说是O(N)那就是O(N)吧。哈哈。
 
+[1]: https://oj.leetcode.com/problems/longest-palindromic-substring/
 
-[1]:https://oj.leetcode.com/problems/longest-palindromic-substring/
-[2]:http://www.felix021.com/blog/read.php?2040
-[3]:http://ww1.sinaimg.cn/mw690/825558b1gw1enz2yc6707j20em03k0sw.jpg
-[4]:http://ww1.sinaimg.cn/mw690/825558b1gw1enz2ye4ndej20em03k74k.jpg
+[2]: http://www.felix021.com/blog/read.php?2040
 
+[3]: https://ww1.sinaimg.cn/mw690/825558b1gw1enz2yc6707j20em03k0sw.jpg
+
+[4]: https://ww1.sinaimg.cn/mw690/825558b1gw1enz2ye4ndej20em03k74k.jpg
