@@ -2,6 +2,7 @@ title: 5# Longest Palindromic Substring
 date: 2015-01-05 21:30:00
 categories: 算法
 tags: [String,回文,算法]
+---
 
 ## description: 弱鸡进城纪实
 
