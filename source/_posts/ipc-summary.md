@@ -1,11 +1,9 @@
 title: Android IPC 学习笔记
 date: 2016-05-02 10:00:00
 categories: 技术
+tags: [Android,IPC]
+description: 五一劳动节就看看书吧
 ---
-
-## tags: [Android,IPC]
-
-## description: 五一劳动节就看看书吧
 
 > IPC: Inter-Process Communication
 
