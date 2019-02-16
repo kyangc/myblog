@@ -11,13 +11,13 @@ description: 老司机还是翻车了
 
 继续追崩溃日志，有一个异常点突然引起了我的注意——在这些所有的崩溃记录中，线程数都异常的高：
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-16-%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-01-16%2021.26.57.png "超高的线程数")
+![](http://img.kyangc.com/2017-01-16-%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-01-16%2021.26.57.png "超高的线程数")
 
 Android/Java虚拟机的线程资源是有限的，在这么高的线程数之下，这个程序基本也活不了太久了……[这篇文章](http://jzhihui.iteye.com/blog/1271122 "这篇文章")大致讲述了Java虚拟机的线程资源与堆栈大小之间的关系，有兴趣的可以看一下。
 
 OK，OOM的根源基本定位到了——超高的线程分配数是罪魁祸首——那么这些超高的线程数是怎么来的呢？我们继续研究报错堆栈。很快，在报错栈的线程列表中，我们发现了大量名为「RxIoScheduler-xx」的线程：
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-16-%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-01-16%2021.41.14.png "超多的 RxIoScheduler-xx 线程")
+![](http://img.kyangc.com/2017-01-16-%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-01-16%2021.41.14.png "超多的 RxIoScheduler-xx 线程")
 
 看到这里，熟悉RxJava Scheduler的使用的同学一定联想到了线程调度符Schedulers.io()，在处理异步的IO动作时，我们正是通过这个将工作调度到IO线程中，在RxJava中的具体实现则是通过一个类似CachedThreadPoolExecutor的线程池来承载业务、分配线程，这个线程池的线程数会随需求的增减动态改变。
 

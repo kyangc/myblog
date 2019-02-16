@@ -18,37 +18,37 @@ description: 对低效说不要不要啦
 
 * 升级Jekins（内部服务器上的Jekins版本低的令人发指），安装BitBucket插件
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-09-install-bitbucket-plugin.png "安装 Jekins Bitbucket 插件")
+![](http://img.kyangc.com/2017-01-09-install-bitbucket-plugin.png "安装 Jekins Bitbucket 插件")
 
 * 在Bitbucket中配置WebHook，填入Jekins实例的地址
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-09-bitbucket-hook.png "Bitbucket 中配置")
+![](http://img.kyangc.com/2017-01-09-bitbucket-hook.png "Bitbucket 中配置")
 
 * 填入需要触发构建的分支名，这里我们随便填个 Dev看看
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-09-bitbucket-config.png "Bitbucket 配置触发条件")
+![](http://img.kyangc.com/2017-01-09-bitbucket-config.png "Bitbucket 配置触发条件")
 
 * Bitbucket上的配置已经完成啦，这里我们回到jekins上，我们新创建一个Project好了，在源码管理部分填入项目地址、构建分支、访问凭证等等东西
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-09-jks-git.png "Jekins 配置源代码管理")
+![](http://img.kyangc.com/2017-01-09-jks-git.png "Jekins 配置源代码管理")
 
 * 在触发器上钩选 `Build when a change pushed to Bitbucket`
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-09-jks-trigger.png "Bitbucket 触发 Jekins 构建")
+![](http://img.kyangc.com/2017-01-09-jks-trigger.png "Bitbucket 触发 Jekins 构建")
 
 * 新增Execute shell 部分，在里面写好构建应用的脚本代码。这里算是整个部分最核心的地方了，清理构建环境、升级SDK、更新Build号等等事情，不过这里就不附图了，代码比较敏感。
 
 * 配置Fir.im的上传插件
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-09-jks-firim.png "Jekins 自动将构建好的安装包上传到 Fir.im 上")
+![](http://img.kyangc.com/2017-01-09-jks-firim.png "Jekins 自动将构建好的安装包上传到 Fir.im 上")
 
 * 配置BearyChat机器人，通知事件。这里只通知构建成功，失败了的话就让他去吧……
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-09-jks-bc.png "BearyChat 通知构建成功")
+![](http://img.kyangc.com/2017-01-09-jks-bc.png "BearyChat 通知构建成功")
 
 * 构建完毕，收到通知，测试现在可以看到这次构建发生了什么变化，以及能够直接访问公司固定的Fir.im链接下载最新的安装包了。
 
-![](http://ojanerta1.bkt.clouddn.com/2017-01-09-bearychat-noti.png "BearyChat 接收通知")
+![](http://img.kyangc.com/2017-01-09-bearychat-noti.png "BearyChat 接收通知")
 
 至此基本所有的流程都走通了，整个过程虽然看上去简单，但是其中总会在某些不知名的角落卡住……比如Bitbucket和Jekins无法互相访问，这个只能联系公司运维解决；比如Jekins的工作环境总是会出一些各种各样的问题……这里也不细讲了，案例都比较个例。
 
