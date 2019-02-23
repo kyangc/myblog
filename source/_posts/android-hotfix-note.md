@@ -37,14 +37,14 @@ description: 热补丁不是请客吃饭
 
 不过Dexposed框架因为无法支持ART虚拟机（Xposed不支持ART虚拟机），在ART渐渐成为Android主流虚拟机的现在显然已经不能满足需求，并且该项目目前已经停止维护了。
 
-![](http://pn0uv0rw1.bkt.clouddn.com/2017-01-05-%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-01-05%2016.20.31.png "Dexposed 支持的系统")
+![](https://imgs.kyangc.com/2017-01-05-%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-01-05%2016.20.31.png "Dexposed 支持的系统")
 
 ## AndFix
 AndFix是来自Alibaba团队的另一个热修复框架作品，阿里百川的 Hotfix方案就是基于该方案统一工具链修改而来。该框架的原理和Xposed在大范围内对native方法进行hook不同，AndFix只对需要修复的方法进行hook。hook的原理很有意思：
 
 开发人员对线上问题进行修改，修改完后通过工具检查新代码和问题代码之间的方法差异，并将这些差异信息写入smali文件，并在每个方法前增加注解标注，然后将所有差异信息打包生成dex文件，连同许多安全校验信息一起打包下发到问题客户端。客户端得到补丁信息之后开始在程序开始的时候载入带有修复方法的dex，然后根据dex中注解提供的参数遍历并找到原有dex中需要替换的方法，找到方法之后首先修改需要替换的方法为native方法，然后在native层对这个方法的调用进行hook，将其指向补丁包中的对应方法地址，以此完成对于方法的替换。
 
-![](http://pn0uv0rw1.bkt.clouddn.com/2017-01-05-principle.png "AndFix原理")
+![](https://imgs.kyangc.com/2017-01-05-principle.png "AndFix原理")
 
 具体的代码这里就不贴了，有兴趣的可以点击文末的链接进去仔细阅读。这个方法最大的优点是足够动态，理论上可以不用重启替换所有的方法，修改基本是即时生效的。而缺点也很明显，该方法不能动态的增减类中的字段，对部分机型不支持，修改之后的方法参数类型也有限制，而且同一个方法不能进行多次patch。
 
@@ -76,19 +76,19 @@ OK，到这里我们就得到了一个可以运行在Android设备上的apk程�
 讲到这里我们稍微插入一小段知识：
 
 > Dalvik/ART虚拟机和普通的Java虚拟机的差异在哪里？
-> 
+>
 > * 核心差异：JVM架构是Stack-Based，基于栈的架构，Dalvik虚拟机的架构为Reg-Based，基于寄存器的架构。JVM之所以采用基于栈的架构，是为了更好的适应所有的底层系统，不对处理器的reg数做假设，成为一个真正的「可移植」虚拟机；Dalvik虚拟机基于寄存器的架构执行效率更高，更加适合提前优化，加上手机处理器多为多reg的ARM系统本身也更加适合这种reg-based的虚拟机。
-> 
+>
 > * 由于核心架构的差异，.dex文件的字节码和.class文件的字节码是不一样的，下图可以比较清晰的说明这一点。
-> 
->   ![](http://pn0uv0rw1.bkt.clouddn.com/2017-01-05-102038a756f731212ebfcec193217c37_b%20-1-.jpg "Dalvik JVM 虚拟机字节码文件差异")
-> 
+>
+>   ![](https://imgs.kyangc.com/2017-01-05-102038a756f731212ebfcec193217c37_b%20-1-.jpg "Dalvik JVM 虚拟机字节码文件差异")
+>
 > * JVM中通常会在同一个虚拟机中运行许多程序，而在Dalvik中，则采用了Zygote模式：在Android系统中，应用程序进程都是由Zygote进程孵化出来的，而Zygote进程是由Init进程启动的。Zygote进程在启动时会创建一个Dalvik虚拟机实例，每当它孵化一个新的应用程序进程时，都会将这个Dalvik虚拟机实例复制到新的应用程序进程里面去，从而使得每一个应用程序进程都有一个独立的Dalvik虚拟机实例。Zygote进程在启动的过程中，除了会创建一个Dalvik虚拟机实例之外，还会将Java运行时库加载到进程中来，以及注册一些Android核心类的JNI方法来前面创建的Dalvik虚拟机实例中去。注意，一个应用程序进程被Zygote进程孵化出来的时候，不仅会获得Zygote进程中的Dalvik虚拟机实例拷贝，还会与Zygote一起共享Java运行时库，这完全得益于Linux内核的进程创建机制（fork）。这种Zygote孵化机制的优点是不仅可以快速地启动一个应用程序进程，还可以节省整体的内存消耗，缺点是会影响开机速度，毕竟Zygote是在开机过程中启动的。
-> 
->   ![](http://pn0uv0rw1.bkt.clouddn.com/2017-01-05-dea144e77ac583b16d7a866ed8d5e891_b.jpg "Zygote模式")
-> 
+>
+>   ![](https://imgs.kyangc.com/2017-01-05-dea144e77ac583b16d7a866ed8d5e891_b.jpg "Zygote模式")
+>
 > * 也即是说，在Android系统中，有多少个应用在运行，那么就有多少个虚拟机正在运行，而这与JVM单虚拟机多程序的架构相去甚远，但这也是移动设备为了适应小内存、低性能所采取的非常有意义的改变。
-> 
+>
 > * 除了指令集和类文件格式不同，Dalvik虚拟机与Java虚拟机共享有差不多的特性，它们都是解释执行，并且支持即时编译（JIT）、垃圾收集（GC）、Java本地方法调用（JNI）和Java远程调试协议（JDWP）等
 
 好，现在我们已经准备好了安装包，接下来，.apk文件是如何安装在Dalvik/ART虚拟机上的？他们又是如何运行的呢？
@@ -117,7 +117,7 @@ OK，说了这么多，似乎有点偏题，净是在说什么虚拟机啊dex啊
 	* BaseDexClassLoader
 		* PathClassLoader - 在应用启动时创建，从应用目录下加载 apk 文件，只能加载已经安装的 dex或apk文件。
 		* DexClassLoader - 类似于PathClassLoader，不过它能够加载来自于其他外部路径的Dex文件 —— 这也是许多热修复的基础，在不需要安装应用的情况下，完成需要的Dex的加载。
-	
+
 无论是PathClassLoader还是DexClassLoader，都只是BaseDexClassLoader的封装，具体的类加载过程都在BaseClassLoader中完成的，下面我们来看它究竟做了什么事情：
 
 * 在外部通过`loadClass(String className)`并遍历双亲得到 class 实例
@@ -162,7 +162,7 @@ protected Class<?> findClass(String name) throws ClassNotFoundException {
     return clazz;
 }
 ```
-	
+
 * 结果还是调用了 DexPathList的findClass
 
 ```java
@@ -181,7 +181,7 @@ public Class findClass(String name) {
 ```
 
 * DexPathList中的dexElements通过下面方法得到
-	
+
 ```java
 private static Element[] makePathElements(List<File> files, File optimizedDirectory,
         List<IOException> suppressedExceptions) {
@@ -229,7 +229,7 @@ private static Element[] makePathElements(List<File> files, File optimizedDirect
     return elements.toArray(new Element[elements.size()]);
 }
 ```
-	
+
 * 其中`loadDexFile()`方法最终会调用JNI方法载入dex对象，这里我们不再深入的去涉及了。
 * 得到dex文件后通过调用`loadClassBinaryName`得到最终的class对象。这里在`loadClassBinaryName`方法中，其实最终调用的依然是Native的`defineClass`方法，这与JVM中`loadClass`的方法名一致，不知道是故意还是巧合。
 
@@ -258,11 +258,11 @@ OK，为了解决这个问题，开发人员从`CLASS_ISPREVERIFIED`的置空条
 
 但是这个方案不是没有问题，在DVM中，因为所有类都是非preverify的状态，这导致verify与optimize操作会在加载类时触发。单次的verify+optimize耗时并不长，而且这个过程只有一次，但是当应用启动时，会一次性载入数量庞大的类，这时的性能影响就不容忽视了。
 
-![](http://pn0uv0rw1.bkt.clouddn.com/2017-01-05-qzone-dalvik.png "Dalvik 类加载时优化")
+![](https://imgs.kyangc.com/2017-01-05-qzone-dalvik.png "Dalvik 类加载时优化")
 
 而在ART中，由于ART采取了新的方式，这种处理对代码的执行效率没有太大影响，但是如果不定的类中出现修改类变量或者方法的情况，则会导致出现内存错乱的问题——因为在安装应用时，dex2oat已经将能够确定的各个地址全部写死为机器码，如果运行时补丁包的地址出现改变，原始类去调用时就会出现地址错乱。为了解决这个问题我们需要将修改了变量、方法以及接口的类的父类以及调用这个类的所有类都加入到补丁包中。这可能会带来补丁包大小的急剧增加。
 
-![](http://pn0uv0rw1.bkt.clouddn.com/2017-01-05-qzone-art%20-2-.png "ART 环境下的变量错乱")
+![](https://imgs.kyangc.com/2017-01-05-qzone-art%20-2-.png "ART 环境下的变量错乱")
 
 总的来说，ClassLoader方案好处在于开发透明，简单，这一套方案目前的应用成功率也是最高的，但在补丁包大小与性能损耗上有一定的局限性。
 
@@ -281,7 +281,7 @@ Instant Run的核心设计有以下几点：
 
 我们在通过Instant Run构建应用的时候，Instant Run通过Gradle的[Trasform api](http://tools.android.com/tech-docs/new-build-system/transform-api "Trasform api")处理了Javac生成的所有.class文件，为每个类都提供了一个字段change，该字段实例实现了IncrementalChange接口，并且在每个方法最前方插入了一段代码来判断是否需要调用一段插入的代码以作为修复之后的调用。话说起来可能比较抽象，看看图吧，原理其实很简单：
 
-![](http://pn0uv0rw1.bkt.clouddn.com/2017-01-06-1480489905685.png "Instant Run 原理")
+![](https://imgs.kyangc.com/2017-01-06-1480489905685.png "Instant Run 原理")
 
 与此同时，在生成.class文件的时候，Instant Run同时也修改了Manifest文件，生成代码注入了一个BoostrapApplication作为原来Application类的代理，以实现修改后补丁文件的监听和ClassLoader的注入。
 
@@ -310,7 +310,7 @@ Tinker的思路很简单——全量替换Dex。是不是有一种暴力美学�
 
 Tinker做到的事情当然不止这么多，ART/Dalvik差异化执行、AndroidN混合编译的支持等等天坑都被他们填了过去，具体的技术细节这里就不分析了，这里附一张图看看Tinker都能做到些什么吧：
 
-![](http://pn0uv0rw1.bkt.clouddn.com/2017-01-08-0.jpeg "Tinker与各种热修复框架技术对比")
+![](https://imgs.kyangc.com/2017-01-08-0.jpeg "Tinker与各种热修复框架技术对比")
 
 # 总结
 断断续续的写了两三天，终于把这篇笔记完成了……回过头去再读了一遍全文，感慨良多。就热修复技术而言，确实是一门太需要持续投入时间的技术了，技术做出来很容易，但是做得好真的太难。就用shwenzhang的一句话为本文做结吧：
