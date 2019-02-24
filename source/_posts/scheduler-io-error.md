@@ -17,7 +17,7 @@ Android/Java虚拟机的线程资源是有限的，在这么高的线程数之�
 
 OK，OOM的根源基本定位到了——超高的线程分配数是罪魁祸首——那么这些超高的线程数是怎么来的呢？我们继续研究报错堆栈。很快，在报错栈的线程列表中，我们发现了大量名为「RxIoScheduler-xx」的线程：
 
-![](https://imgs.kyangc.com/2017-01-16-%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-01-16%2021.41.14.png "超多的 RxIoScheduler-xx 线程")
+![](https://imgs.kyangc.com/threads.png "超多的 RxIoScheduler-xx 线程")
 
 看到这里，熟悉RxJava Scheduler的使用的同学一定联想到了线程调度符Schedulers.io()，在处理异步的IO动作时，我们正是通过这个将工作调度到IO线程中，在RxJava中的具体实现则是通过一个类似CachedThreadPoolExecutor的线程池来承载业务、分配线程，这个线程池的线程数会随需求的增减动态改变。
 
@@ -64,7 +64,7 @@ public void call(final Subscriber<? super T> subscriber) {
 					//注意！这里只调用了onNext，并没有取消对于源的订阅！这也是为什么只调用onNext不调用onComplete或onError不会取消订阅者对于发送者的订阅的原因
                     subscriber.onNext(t);
                 }
-	
+
                 @Override
                 public void onError(Throwable e) {
                     try {
@@ -74,7 +74,7 @@ public void call(final Subscriber<? super T> subscriber) {
                         inner.unsubscribe();
                     }
                 }
-	
+
                 @Override
                 public void onCompleted() {
                     try {
@@ -84,7 +84,7 @@ public void call(final Subscriber<? super T> subscriber) {
                         inner.unsubscribe();
                     }
                 }
-	
+
                 @Override
                 public void setProducer(final Producer p) {
                     subscriber.setProducer(new Producer() {
@@ -104,7 +104,7 @@ public void call(final Subscriber<? super T> subscriber) {
                     });
                 }
             };
-	
+
 			//将重新组装之后的subscriber重新用源observable订阅起来
             source.unsafeSubscribe(s);
         }
@@ -121,4 +121,3 @@ public void call(final Subscriber<? super T> subscriber) {
 言归正传，最终我们得出了这么一个结论：
 
 > 如果不是直接使用类似于`just`、`from`、`zip`等等已经封装好的操作符，而是直接新建`onSubscribe`对象，自己处理`subscriber`的`onNext`、`onError`等操作的话，最好是能做到在正确返回数据时调用`onNext`，在错误时调用`onError`，并且保证在所有动作处理结束之后能够调用`onComplete`动作结尾。
-
