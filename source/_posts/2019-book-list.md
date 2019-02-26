@@ -2,8 +2,10 @@
 title: 2019 读书计划
 date: 2019-02-25 23:58:14
 tags: [书单]
-description: 读书计划及完成情况
+description: 人丑就要多读书
 categories: 折腾
+top: true
+sticky: true
 ---
 
 ## 进行中
