@@ -74,7 +74,7 @@ pagination_dir: page
 algolia:
   applicationID: SXQDQSL95M
   apiKey: 3d6b1e9b712bfcd0b92bc74b4cc40679
-  indexName: SXQDQSL95M
+  indexName: my_blog
   chunkSize: 5000
 
 # Extensions
