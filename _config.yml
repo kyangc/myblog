@@ -71,6 +71,12 @@ time_format: HH:mm:ss
 per_page: 8
 pagination_dir: page
 
+algolia:
+  applicationID: SXQDQSL95M
+  apiKey: 3d6b1e9b712bfcd0b92bc74b4cc40679
+  indexName: SXQDQSL95M
+  chunkSize: 5000
+
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
