@@ -36,7 +36,7 @@ public static int idealByteArraySize(int need) {
 
     return need;
 }
-``` 
+```
 
 因此初始化大小只能是 4、20、52、116、244…… 这么几个大小，这里稍微有点没看明白为什么 -12，这个之后再研究一下。
 
@@ -44,56 +44,56 @@ public static int idealByteArraySize(int need) {
 
 ```java
 public void put(int key, E value) {
-		// 二分查找找到 key 对应的 index
-    int i =  ContainerHelpers.binarySearch(mKeys, mSize, key);
+    // 二分查找找到 key 对应的 index
+    int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
     if (i >= 0) {
-			// index 合法，说明原来就有这个 key，直接在 key 对应的 index 下修改 value
+        // index 合法，说明原来就有这个 key，直接在 key 对应的 index 下修改 value
         mValues[i] = value;
     } else {
-			// 这是个二分查找返回结果的 trick，这里的 index 如果为负值，那么就代表着查找值应该插入的位置的取反值，我们之后看看这个二分查找方法
+        // 这是个二分查找返回结果的 trick，这里的 index 如果为负值，那么就代表着查找值应该插入的位置的取反值，我们之后看看这个二分查找方法
         i = ~i;
-			
-			// 如果 index 位置上被标志了 DELETED，那么可以直接把新值写入这个位置
+
+        // 如果 index 位置上被标志了 DELETED，那么可以直接把新值写入这个位置
         if (i < mSize && mValues[i] == DELETED) {
             mKeys[i] = key;
             mValues[i] = value;
             return;
         }
 
-			// 如果当前 SparseArray 被标记了需要一次垃圾回收，并且 mSize 大于 mKeys 的长度，那么就进行一次 gc，并且重新计算这个 key 应该插入的位置
+        // 如果当前 SparseArray 被标记了需要一次垃圾回收，并且 mSize 大于 mKeys 的长度，那么就进行一次 gc，并且重新计算这个 key 应该插入的位置
         if (mGarbage && mSize >= mKeys.length) {
             gc();
 
             // Search again because indices may have changed.
-            i = ~ ContainerHelpers.binarySearch(mKeys, mSize, key);
+            i = ~ContainerHelpers.binarySearch(mKeys, mSize, key);
         }
 
-			// 如果此时 mKeys 数组的长度已经装不下 mSize 大小的内容，那么需要一次扩容
+        // 如果此时 mKeys 数组的长度已经装不下 mSize 大小的内容，那么需要一次扩容
         if (mSize >= mKeys.length) {
-				// 重新计算得到一个容量大小
-            int n =  ContainerHelpers.idealIntArraySize(mSize + 1);
+            // 重新计算得到一个容量大小
+            int n = ContainerHelpers.idealIntArraySize(mSize + 1);
 
             int[] nkeys = new int[n];
             Object[] nvalues = new Object[n];
 
-				// 拷贝原有数组到新的数组
+            // 拷贝原有数组到新的数组
             System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
             System.arraycopy(mValues, 0, nvalues, 0, mValues.length);
 
-				// 将新的数组对象作为内置数组对象
+            // 将新的数组对象作为内置数组对象
             mKeys = nkeys;
             mValues = nvalues;
         }
 
-			// 如果被插入的 key-value 不是数组的最后一个，那么需要将插入后位于 key 后方的内容整体向后移一位
+        // 如果被插入的 key-value 不是数组的最后一个，那么需要将插入后位于 key 后方的内容整体向后移一位
         if (mSize - i != 0) {
             // Log.e("SparseArray", "move " + (mSize - i));
             System.arraycopy(mKeys, i, mKeys, i + 1, mSize - i);
             System.arraycopy(mValues, i, mValues, i + 1, mSize - i);
         }
-			
-			// 最终将 key-value 分别放入对应的位置上
+
+        // 最终将 key-value 分别放入对应的位置上
         mKeys[i] = key;
         mValues[i] = value;
         mSize++;
@@ -106,11 +106,9 @@ public void put(int key, E value) {
 1. SparseArray 内部是两个相同长度的数组 mKeys 和 mValues，mKeys 中按照升序存储 key 值，mValues 在对应的位置存放 value 值。
 
 2. ContainerHelpers.binarySearch 返回的结果包含两层含义：
-	
 	1. 结果为非负值，代表查找到了对应的内容，位置在该 index 下
-
 	2. 结果为负值，代表查找内容失败，对该负 index 求反，即为该值应该所处的位置，也即应该插入的位置
-
+	
 	所以我们只需要做一次查找，就可以得到两种情况下我们所需要的 index 值，非常高效、简洁。
 
 3. 当插入内容时，如果发现 value 值为 DELETED，那么直接就写入内容，这其实是之后会提到的，SparseArray 在删除节点时做的一种优化，即 SparseArray 再删除元素时不会立即清理 key-value 数组，而是将被删除的节点进行标记，如果在下一次扩容、缩容之前在这些位置有写入动作，那么可以直接对相应位置上的 value 进行赋值，减少了许多扩容缩容的性能开销。
@@ -309,7 +307,7 @@ private static void freeArrays(final int[] hashes, final Object[] array, final i
 ```java
 public V get(Object key) {
     final int index = indexOfKey(key);
-    return index >= 0 ? (V)mArray[(index<<1)+1] : null;
+    return index >= 0 ? (V) mArray[(index << 1) + 1] : null;
 }
 
 public int indexOfKey(Object key) {
@@ -324,20 +322,23 @@ int indexOf(Object key, int hash) {
         return ~0;
     }
 
-		// 在 mHashes 数组中查找 hash 的位置
+    // 在 mHashes 数组中查找 hash 的位置
     int index = binarySearchHashes(mHashes, N, hash);
 
-    // mHashes 中没有这个 hash 值，说明现在 map 中没有这个 key-value 对，直接返回这个负的 index 值，之后对其取反即为这个新 key 的 hash 应该所在的位置
+    // mHashes 中没有这个 hash 值，说明现在 map 中没有这个 key-value 对，直接返回这个负的 index 值，之后对其取反即为这个新 key 的 
+    // hash 应该所在的位置
     if (index < 0) {
         return index;
     }
 
-    // 此时在 mHashes 中找到了对应的 hash 值，检查对应 mArray 中，2*index 位置的 key 值是否也匹配，如果匹配的话就返回这个 mHashes 数组中匹配的 index 值
-    if (key.equals(mArray[index<<1])) {
+    // 此时在 mHashes 中找到了对应的 hash 值，检查对应 mArray 中，2*index 位置的 key 值是否也匹配，如果匹配的话就返回这个 mHashes 
+    // 数组中匹配的 index 值
+    if (key.equals(mArray[index << 1])) {
         return index;
     }
 
-    // 此时在 mHashes 中找到了对应的 hash 值，检查对应 mArray 中，2*index 位置的 key 值是否也匹配，如果不匹配的话，从 index 开始，比对所有相同 hash 对应的 key 值，向后查找，找到即返回
+    // 此时在 mHashes 中找到了对应的 hash 值，检查对应 mArray 中，2*index 位置的 key 值是否也匹配，如果不匹配的话，从 index 
+    // 开始，比对所有相同 hash 对应的 key 值，向后查找，找到即返回
     int end;
     for (end = index + 1; end < N && mHashes[end] == hash; end++) {
         if (key.equals(mArray[end << 1])) return end;
@@ -353,7 +354,7 @@ int indexOf(Object key, int hash) {
 }
 ```
 
-我们可以看到，我们会首先通过 key 计算 hash，然后在 mHashes 数组中查找 hash 的位置 index，而对应的 key-value 则存放在 2*index 和 2*index+1 的位置上。
+我们可以看到，我们会首先通过 key 计算 hash，然后在 mHashes 数组中查找 hash 的位置 index，而对应的 key-value 则存放在 2 * index 和 2 * index+1 的位置上。
 
 由于 hash 可能碰撞，因此当 hash 相同时，需要比对 key 值，这里通过前向后向两次遍历找到匹配的 key 值。如果 key 匹配，那么能够在相应的位置找到 value，否则返回负值表征查找失败。
 
@@ -370,8 +371,8 @@ public V put(K key, V value) {
     final int osize = mSize;
     final int hash;
     int index;
-		
-		// 计算 key 的 hash，并得到 hash 应该处在 mHashes 数组的位置
+
+    // 计算 key 的 hash，并得到 hash 应该处在 mHashes 数组的位置
     if (key == null) {
         hash = 0;
         index = indexOfNull();
@@ -380,44 +381,44 @@ public V put(K key, V value) {
         index = indexOf(key, hash);
     }
 
-		// 如果 index 合法，直接存入内容
+    // 如果 index 合法，直接存入内容
     if (index >= 0) {
-        index = (index<<1) + 1;
-        final V old = (V)mArray[index];
+        index = (index << 1) + 1;
+        final V old = (V) mArray[index];
         mArray[index] = value;
         return old;
     }
 
-		// 如果 index 为负，取反得到 hash 应当插入的位置
+    // 如果 index 为负，取反得到 hash 应当插入的位置
     index = ~index;
 
-		// 如果原有数组大小已经不足够存放新的 hash，那么需要进行扩容，并且扩容后，这个 hash 应当放在扩容后数组的最后一个位置
+    // 如果原有数组大小已经不足够存放新的 hash，那么需要进行扩容，并且扩容后，这个 hash 应当放在扩容后数组的最后一个位置
     if (osize >= mHashes.length) {
-			// 新数组的大小为 4 8 或 1.5 倍原有 size
-        final int n = osize >= (BASE_SIZE*2) ? (osize+(osize>>1))
-                : (osize >= BASE_SIZE ? (BASE_SIZE*2) : BASE_SIZE);
+        // 新数组的大小为 4 8 或 1.5 倍原有 size
+        final int n = osize >= (BASE_SIZE * 2) ? (osize + (osize >> 1))
+                : (osize >= BASE_SIZE ? (BASE_SIZE * 2) : BASE_SIZE);
 
         final int[] ohashes = mHashes;
         final Object[] oarray = mArray;
 
-			// 分配新的数组给 mHashes 和 mArray
+        // 分配新的数组给 mHashes 和 mArray
         allocArrays(n);
 
         if (CONCURRENT_MODIFICATION_EXCEPTIONS && osize != mSize) {
             throw new ConcurrentModificationException();
         }
 
-			// 拷贝旧数组到新数组
+        // 拷贝旧数组到新数组
         if (mHashes.length > 0) {
             System.arraycopy(ohashes, 0, mHashes, 0, ohashes.length);
             System.arraycopy(oarray, 0, mArray, 0, oarray.length);
         }
 
-			// 回收旧数组
+        // 回收旧数组
         freeArrays(ohashes, oarray, osize);
     }
 
-		// 如果数组容量足够，那么直接把 index 之后的内容向后移
+    // 如果数组容量足够，那么直接把 index 之后的内容向后移
     if (index < osize) {
         System.arraycopy(mHashes, index, mHashes, index + 1, osize - index);
         System.arraycopy(mArray, index << 1, mArray, (index + 1) << 1, (mSize - index) << 1);
@@ -429,10 +430,10 @@ public V put(K key, V value) {
         }
     }
 
-		// 在 index 位置插入数据
+    // 在 index 位置插入数据
     mHashes[index] = hash;
-    mArray[index<<1] = key;
-    mArray[(index<<1)+1] = value;
+    mArray[index << 1] = key;
+    mArray[(index << 1) + 1] = value;
     mSize++;
     return null;
 }
@@ -445,7 +446,7 @@ public V put(K key, V value) {
 ```java
 public V remove(Object key) {
     final int index = indexOfKey(key);
-		// 仅在找到了对应 key 的 index 时执行 remove 操作，否则直接返回 null
+    // 仅在找到了对应 key 的 index 时执行 remove 操作，否则直接返回 null
     if (index >= 0) {
         return removeAt(index);
     }
@@ -454,47 +455,47 @@ public V remove(Object key) {
 }
 
 public V removeAt(int index) {
-		// 得到要被删除的对象
+    // 得到要被删除的对象
     final Object old = mArray[(index << 1) + 1];
     final int osize = mSize;
     final int nsize;
     if (osize <= 1) {
-			// 被删除的元素是原数组的最后一个时，直接回收数组，尺寸置 0
+        // 被删除的元素是原数组的最后一个时，直接回收数组，尺寸置 0
         freeArrays(mHashes, mArray, osize);
         mHashes = ContainerHelpers.EMPTY_INTS;
         mArray = ContainerHelpers.EMPTY_OBJECTS;
         nsize = 0;
     } else {
         nsize = osize - 1;
-			// 当 hash 数组的长度大于 8 且 大于三倍的元素数量时，需要进行缩容
-        if (mHashes.length > (BASE_SIZE*2) && mSize < mHashes.length/3) {
+        // 当 hash 数组的长度大于 8 且 大于三倍的元素数量时，需要进行缩容
+        if (mHashes.length > (BASE_SIZE * 2) && mSize < mHashes.length / 3) {
             // 重新利用元素数来计算 hash 和 array 数组的长度
-            final int n = osize > (BASE_SIZE*2) ? (osize + (osize>>1)) : (BASE_SIZE*2);
+            final int n = osize > (BASE_SIZE * 2) ? (osize + (osize >> 1)) : (BASE_SIZE * 2);
 
             final int[] ohashes = mHashes;
             final Object[] oarray = mArray;
 
-				// 重新按计算出来的数分配数组
+            // 重新按计算出来的数分配数组
             allocArrays(n);
 
             if (CONCURRENT_MODIFICATION_EXCEPTIONS && osize != mSize) {
                 throw new ConcurrentModificationException();
             }
 
-				// 将被删除元素之前的内容拷贝入新数组
+            // 将被删除元素之前的内容拷贝入新数组
             if (index > 0) {
                 System.arraycopy(ohashes, 0, mHashes, 0, index);
                 System.arraycopy(oarray, 0, mArray, 0, index << 1);
             }
 
-				// 将被删除元素之后的内容拷贝入新数组，完成缩容+元素删除
+            // 将被删除元素之后的内容拷贝入新数组，完成缩容+元素删除
             if (index < nsize) {
                 System.arraycopy(ohashes, index + 1, mHashes, index, nsize - index);
                 System.arraycopy(oarray, (index + 1) << 1, mArray, index << 1,
                         (nsize - index) << 1);
             }
         } else {
-				// 此时不需要缩容，将被删除元素之后的元素整体向前搬移一位
+            // 此时不需要缩容，将被删除元素之后的元素整体向前搬移一位
             if (index < nsize) {
                 System.arraycopy(mHashes, index + 1, mHashes, index, nsize - index);
                 System.arraycopy(mArray, (index + 1) << 1, mArray, index << 1,
@@ -508,7 +509,7 @@ public V removeAt(int index) {
         throw new ConcurrentModificationException();
     }
     mSize = nsize;
-    return (V)old;
+    return (V) old;
 }
 ```
 
