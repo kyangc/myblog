@@ -72,8 +72,8 @@ per_page: 8
 pagination_dir: page
 
 algolia:
-  applicationID: SXQDQSL95M
-  apiKey: 3d6b1e9b712bfcd0b92bc74b4cc40679
+  applicationID: AQU6HKX9FB
+  apiKey: 2b6a378182ab713241dabf9279f423c2
   indexName: my_blog
   chunkSize: 5000
 
