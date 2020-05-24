@@ -8,8 +8,8 @@ subtitle: 看心情更新
 description: 阿阳的博客
 keywords: 阿阳
 author: KYANGC
-language:
-timezone:
+language: zh
+timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
